@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYS_TODO_LIST.EXE</title>
+    <!-- Import a pixelated 8-bit font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for our Cyber-Pixel Theme */
+        :root {
+            --bg-color: #050505;
+            --terminal-green: #39ff14;
+            --terminal-red: #ff003c;
+            --terminal-dim: #1a5e0b;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--terminal-green);
+            font-family: 'Press Start 2P', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* CRT Scanline Effect Overlay */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        /* Main Container Container */
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(0, 20, 0, 0.8);
+            border: 4px solid var(--terminal-green);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.3), inset 0 0 20px rgba(57, 255, 20, 0.2);
+            padding: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Glitchy Header Title */
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 0px var(--terminal-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Blinking Cursor animation */
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* Form Layout */
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background: transparent;
+            border: 2px solid var(--terminal-green);
+            color: var(--terminal-green);
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px;
+            font-size: 14px;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px var(--terminal-green);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--terminal-dim);
+        }
+
+        button {
+            background: var(--terminal-green);
+            color: var(--bg-color);
+            border: 2px solid var(--terminal-green);
+            font-family: 'Press Start 2P', monospace;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: transparent;
+            color: var(--terminal-green);
+            box-shadow: 0 0 10px var(--terminal-green);
+        }
+
+        /* Task List */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-bottom: 2px dashed var(--terminal-dim);
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .task-text {
+            font-size: 12px;
+            line-height: 1.5;
+            word-break: break-all;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--terminal-red);
+            border: 2px solid var(--terminal-red);
+            padding: 10px 15px;
+            font-size: 10px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: var(--terminal-red);
+            color: var(--bg-color);
+            box-shadow: 0 0 10px var(--terminal-red);
+        }
+
+        /* Custom Scrollbar for the Task List */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+            border-left: 2px solid var(--terminal-dim);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--terminal-green);
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    
+    <div class="container">
+        <h1>SYS_TODO_LIST<span class="blink">_</span></h1>
+        
+        <!-- Add Task Form -->
+        <form action="/add" method="POST">
+            <input type="text" name="content" placeholder="> ENTER NEW DIRECTIVE..." required autocomplete="off" autofocus>
+            <button type="submit">ADD</button>
+        </form>
+
+        <!-- Display Existing Tasks -->
+        <ul>
+            {% for task in tasks %}
+                <li>
+                    <span class="task-text">> {{ task.content }}</span>
+                    <!-- Link to Delete Route -->
+                    <a href="/delete/{{ task.id }}" class="delete-btn">[X]</a>
+                </li>
+            {% else %}
+                <li style="justify-content: center; border: none; color: var(--terminal-dim);">
+                    NO ACTIVE DIRECTIVES
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
