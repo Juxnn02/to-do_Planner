@@ -3,7 +3,6 @@ from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
 
 # In-memory list to store our tasks 
-# (Since this is a simple midterm project, we won't use a database)
 tasks = []
 task_id_counter = 1
 
@@ -42,5 +41,5 @@ def delete_task(task_id):
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    # Required Configuration from the Midterm Assessment PDF
+    # Required Configuration
     app.run(debug=True, host="0.0.0.0", port=8080)
